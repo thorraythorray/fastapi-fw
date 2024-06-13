@@ -1,10 +1,11 @@
 from enum import IntEnum
+
 from tortoise import fields
 
-from app.core.base.model import BaseOrmModel
+from app.core.base.model import TimestampModel
 
 
-class Role(BaseOrmModel):
+class Role(TimestampModel):
     name = fields.CharField(max_length=32)
 
 
@@ -14,7 +15,7 @@ class GenderEnum(IntEnum):
     FEMALE = 2
 
 
-class User(BaseOrmModel):
+class User(TimestampModel):
     name = fields.CharField(max_length=64)
     email = fields.CharField(max_length=128)
     phone = fields.CharField(max_length=16, null=True)
