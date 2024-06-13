@@ -1,39 +1,64 @@
-import os
-from typing import Any, Dict
-from pydantic import Field
-from pydantic_settings import BaseSettings, EnvSettingsSource
+from typing import List
+from pydantic import RedisDsn, MySQLDsn, SecretStr, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+ENV_FILES = ('.env', '.env.usr',)
+ENV_ENCODING = 'utf-8'
+
+
+class RedisSettings(BaseSettings):
+    host: str = '127.0.0.1'
+    port: int = 6379
+    passwd: str
+
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILES,
+        env_file_encoding=ENV_ENCODING,
+        env_prefix = "REDIS_",
+    )
+
+    @property
+    def default_redis_dsn(self) -> RedisDsn:
+        return f'redis://:{self.passwd}@{self.host}:{self.port}/0'
+
+
+class MysqlSettings(BaseSettings):
+    host: str = '127.0.0.1'
+    port: int = 3306
+    user: str
+    passwd: SecretStr
+    db: str
+
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILES,
+        env_file_encoding=ENV_ENCODING,
+        env_prefix = "MYSQL_",
+        extra='allow',
+    )
+
+    @property
+    def mysql_dsn(self) -> MySQLDsn:
+        return 'mysql://{}:{}@{}:{}/{}'.format(
+            self.host, self.port, self.user, self.passwd.get_secret_value(), self.db,
+        )
 
 
 class Settings(BaseSettings):
+    debug: bool = True
+    server_host: str
+    allowed_cors_origins: str
 
-    class Config:
-        env_prefix = "MY_"
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    redis: RedisSettings = RedisSettings()
+    msyql: MysqlSettings = MysqlSettings()
+
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILES,
+        env_file_encoding=ENV_ENCODING,
+    )
+
+    @field_validator("allowed_cors_origins", mode='after')
+    def split_allowed_cors_origins(cls, v: str) -> List[str]:
+        return v.split(',')
 
 
-settings = Settings()
-
-# print(settings)
-
-# class Settings(BaseSettings):
-#     DEBUG: bool = Field(False, env="DEBUG")
-
-#     SERVER_HOST: str = Field(..., env="SERVER_HOST")
-
-#     REDIS_HOST: str = Field(..., env="REDIS_HOST")
-#     REDIS_PORT: str = Field(..., env="REDIS_PORT")
-#     REDIS_PASSWD: str = Field(..., env="REDIS_PASSWD")
-
-#     MYSQL_HOST: str = Field(..., env="MYSQL_HOST")
-#     MYSQL_PORT: str = Field(..., env="MYSQL_PORT")
-#     MYSQL_USER: str = Field(..., env="MYSQL_USER")
-#     MYSQL_PASSWD: str = Field(..., env="MYSQL_PASSWD")
-#     MYSQL_DB: str = Field(..., env="MYSQL_DB")
-
-#     ALLOWED_CORS_ORIGINS: str = Field(..., env="ALLOWED_CORS_ORIGINS")
-
-#     class Config:
-#         env_file = ".env"
-
-# print(Settings().MYSQL_USER)
+print(Settings().dict())
