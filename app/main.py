@@ -1,19 +1,10 @@
-import os
-from datetime import timedelta
-
 from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi_login import LoginManager
 from tortoise import Tortoise
 
 from app.core.errors import register_exception_handlers
 from settings.settings import settings
-
-ROOT = os.path.dirname(os.path.abspath(__file__))
-
-SECRET = "super-secret-key"
-login_manager = LoginManager(SECRET, token_url="/auth/token", default_expiry=timedelta(hours=2))
 
 
 async def get_fastapi_app():
@@ -31,8 +22,6 @@ async def get_fastapi_app():
 
 
     app = FastAPI(lifespan=lifespan)
-
-    # login_manager.attach_middleware(app)
 
     app.add_middleware(
         CORSMiddleware,

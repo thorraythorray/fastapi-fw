@@ -1,9 +1,12 @@
+import os
 from typing import List
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from settings.internal.common import ENV_ENCODING, ENV_FILES
 from settings.internal.db import MysqlSettings, RedisSettings
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
 class Settings(BaseSettings):
