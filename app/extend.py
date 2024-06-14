@@ -2,19 +2,16 @@ from datetime import timedelta
 
 from fastapi_login import LoginManager
 
-
-SECRET = "super-secret-key"
+from app.admin.models import User
+from app.settings import SECRET_KEY
 
 login_manager = LoginManager(
-    SECRET,
+    SECRET_KEY,
     token_url="/auth/token",
     default_expiry=timedelta(hours=2)
 )
 
 
 @login_manager.user_loader
-def load_user(username: str):
-    # user_dict = fake_users_db.get(username)
-    # if user_dict:
-    #     return UserInDB(**user_dict)
-    return None
+async def load_user(username: str):
+    return await User.get(username=username)

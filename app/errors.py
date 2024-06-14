@@ -24,7 +24,7 @@ class NotFound(HTTPException):
         super().__init__(status_code, detail)
 
 
-# 更改系统内置的异常处理，例如统一处理500的response为TemplateResponse
+# 更改系统内置的异常处理，例如统一处理500的TemplateResponse
 # app.add_exception_handler(HTTP_500_INTERNAL_SERVER_ERROR, server_error_exception)
 
 
@@ -35,10 +35,10 @@ class AppServiceError(Exception):
 
 
 # 处理自定义异常
-async def register_exception_handlers(app: FastAPI):
+def register_exception_handlers(app: FastAPI):
 
     @app.exception_handler(AppServiceError)
-    async def _(request: Request, exc: AppServiceError):
+    def _(request: Request, exc: AppServiceError):
         return JSONResponse(
             status.HTTP_500_INTERNAL_SERVER_ERROR,
             content=exc.message
