@@ -1,11 +1,11 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr, Field, PositiveInt, SecretStr
+from pydantic import BaseModel, EmailStr, Field, PositiveInt
 
 
-class LoginRequest(BaseModel):
+class LoginSchema(BaseModel):
     username: str
     password: str
-    code: Optional[str]  # Optional[X] is equivalent to Union[X, None].
+    code: Optional[str] = None  # Optional[X] is equivalent to Union[X, None].
 
 
 class UserSchema(BaseModel):
@@ -18,11 +18,10 @@ class UserSchema(BaseModel):
     avatar: Optional[str] = None
     role: Optional[int] = None
     phone: Optional[str] = None
+
+
+class RegisterSchema(UserSchema):
     passwd: Optional[str] = None
-
-
-class UserRegisterSchema(UserSchema):
-    pass
 
 
 class RoleSchema(BaseModel):

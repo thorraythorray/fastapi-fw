@@ -3,6 +3,7 @@ from enum import IntEnum
 from tortoise import fields
 
 from app.base.model import TimestampModel
+from app.utils.crypts import crypte_content
 
 
 class Role(TimestampModel):
@@ -25,3 +26,6 @@ class User(TimestampModel):
     avatar = fields.CharField(max_length=255, null=True)
     is_active = fields.BooleanField(default=True)
     role = fields.ForeignKeyField('admin.Role', related_name='users', on_delete=fields.SET_NULL, null=True)
+
+    def verify_password(self, password):
+        return crypte_content.verify(password, self.passwd)

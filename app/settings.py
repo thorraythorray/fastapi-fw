@@ -68,3 +68,18 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+TORTOISE_ORM = {
+    "connections": {"default": settings.mysql.default_dsn},
+    "apps": {
+        "aerich": {
+            "models": ["aerich.models"],
+            "default_connection": "default",  # 指定 Aerich 模型使用的默认连接
+        },
+        "admin": {
+            "models": ["app.admin.models"],
+            "default_connection": "default",
+        },
+    },
+}

@@ -1,12 +1,8 @@
-from app.admin.schemas import UserRegisterSchema, UserSchema
-
-from passlib.context import CryptContext
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from app.admin.schemas import RegisterSchema
+from app.utils.crypts import crypte_content
 
 
-def register_user(user: UserSchema) -> dict:
-    data = user.model_dump()
-    hash_passwd = pwd_context.hash(data["passwd"])
+def encrypt_passwd(data: dict) -> RegisterSchema:
+    hash_passwd = crypte_content.hash(data["passwd"])
     data["passwd"] = hash_passwd
-    return data
+    return RegisterSchema(**data)
