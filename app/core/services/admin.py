@@ -1,6 +1,7 @@
 from typing import Optional, Tuple, Union
 
-from app.admin.models import User
+from app.core.errors import AuthError, AuthForbbiden
+from app.core.models.admin import User
 
 
 class UserManger:
@@ -19,3 +20,12 @@ class UserManger:
         except User.DoesNotExist:
             return False, None
         return True, user
+
+    @staticmethod
+    async def verify_user(username: str, password: str):
+        user = await User.filter(name=username).first()
+        if not user:
+            raise AuthError('用户不存在')
+
+        if not user.verify_password(password):
+            raise AuthForbbiden('密码错误')

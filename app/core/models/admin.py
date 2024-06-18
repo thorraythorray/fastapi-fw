@@ -2,12 +2,15 @@ from enum import IntEnum
 
 from tortoise import fields
 
-from app.base.model import TimestampModel
-from app.utils.crypts import crypte_content
+from app.core.base.model import TimestampModel
+from app.core.utils.passlib import crypt_content
 
 
 class Role(TimestampModel):
     name = fields.CharField(max_length=32, unique=True)
+
+    class Meta:
+        table = "admin_role"
 
 
 class GenderEnum(IntEnum):
@@ -25,7 +28,10 @@ class User(TimestampModel):
     sex = fields.IntEnumField(enum_type=GenderEnum, default=0)
     avatar = fields.CharField(max_length=255, null=True)
     is_active = fields.BooleanField(default=True)
-    role = fields.ForeignKeyField('admin.Role', related_name='users', on_delete=fields.SET_NULL, null=True)
+    role = fields.ForeignKeyField('core.Role', related_name='users', on_delete=fields.SET_NULL, null=True)
+
+    class Meta:
+        table = "admin_user"
 
     def verify_password(self, password):
-        return crypte_content.verify(password, self.passwd)
+        return crypt_content.verify(password, self.passwd)
