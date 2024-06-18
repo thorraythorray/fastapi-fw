@@ -5,7 +5,7 @@ from app.core.models.admin import User
 from app.core.schemas.admin import LoginSchema, RegisterSchema, UserSchema
 from app.core.services.admin import UserManger
 from app.core.errors import DuplicatedError
-from app.core.utils import auth_manager
+from app.core.utils.authx import auth_manager
 
 router = APIRouter()
 
