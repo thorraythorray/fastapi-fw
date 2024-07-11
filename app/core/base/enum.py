@@ -1,13 +1,14 @@
-from enum import Enum, IntEnum
+from enum import IntEnum
 
 
-# class GenderEnum(IntEnum):
-#     unkown = 0
-#     male = 1
-#     female = 2
+class GenderEnum(IntEnum):
+    unkown = 0
+    male = 1
+    female = 2
 
 
-class GenderEnum(str, Enum):
-    unkown = '不明'
-    male = '男性'
-    female = '女性'
+GENDER_TEXT_CONVERT = {
+    GenderEnum.unkown: '未知',
+    GenderEnum.male: '男',
+    GenderEnum.female: '女',
+}

@@ -41,9 +41,9 @@ class UserDaoMgr:
         return user
 
     @staticmethod
-    async def list(query_schema: UserQuerySchema):
+    async def list(query_schema: UserQuerySchema) -> dict:
         query_dict = query_schema.model_dump()
         page = query_dict.pop('page')
         size = query_dict.pop('size')
         users = await User.filter(**query_dict).all().limit(size).offset((page - 1) * size)
-        return users
+        return dict(items=users, page=page, size=size)

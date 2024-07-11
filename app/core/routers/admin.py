@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import PlainTextResponse
 
 from app.core.dependencies.auth import oauth2_authentication
-from app.core.schemas.admin import RegisterSchema, UserQuerySchema, UserSchema, \
+from app.core.schemas.admin import RegisterSchema, UserQuerySchema, UserInfoSchema, \
     UsersPagitionSchema
 from app.core.services.admin import UserDaoMgr
 from app.core.security import auth_manager
@@ -27,12 +27,11 @@ async def read_me(request: Request):
     return PlainTextResponse('ok')
 
 
-@router.post("/user", response_model=UserSchema, dependencies=[Depends(oauth2_authentication)])
+@router.post("/user", response_model=UserInfoSchema, dependencies=[Depends(oauth2_authentication)])
 async def create_user(data: RegisterSchema):
     return await UserDaoMgr.create(data)
 
 
 @router.get("/users", response_model=UsersPagitionSchema, dependencies=[Depends(oauth2_authentication)])
 async def user_list(query_schema: UserQuerySchema = Depends()):
-    user_list = await UserDaoMgr.list(query_schema)
-    return {"items": user_list}
+    return await UserDaoMgr.list(query_schema)
