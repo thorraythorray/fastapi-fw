@@ -6,7 +6,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
-SECRET_KEY = "5f-Kh8) GK~j!$^% Q&*p@#q"
 
 ENV_FILES = (os.path.join(ROOT, '.env'), os.path.join(ROOT, '.env.usr'),)
 ENV_ENCODING = 'utf-8'
@@ -15,7 +14,7 @@ ENV_ENCODING = 'utf-8'
 class GeneralSettings(BaseSettings):
     host: str = '127.0.0.1'
     port: int
-    passwd: SecretStr
+    password: SecretStr
 
 
 class RedisSettings(GeneralSettings):
@@ -28,7 +27,7 @@ class RedisSettings(GeneralSettings):
 
     @property
     def default_dsn(self) -> RedisDsn:
-        return f'redis://:{self.passwd}@{self.host}:{self.port}/0'
+        return f'redis://:{self.password.get_secret_value()}@{self.host}:{self.port}/0'
 
 
 class MysqlSettings(GeneralSettings):
@@ -44,7 +43,7 @@ class MysqlSettings(GeneralSettings):
     @property
     def default_dsn(self) -> MySQLDsn:
         return 'mysql://{}:{}@{}:{}/{}'.format(
-            self.user, self.passwd.get_secret_value(), self.host, self.port, self.db,
+            self.user, self.password.get_secret_value(), self.host, self.port, self.db,
         )
 
 
