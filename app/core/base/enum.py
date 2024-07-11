@@ -1,7 +1,13 @@
-from enum import Enum
+from enum import Enum, IntEnum
 
 
-class Gender(int, Enum):
-    unkown = 0
-    male = 1
-    female = 2
+# class GenderEnum(IntEnum):
+#     unkown = 0
+#     male = 1
+#     female = 2
+
+
+class GenderEnum(str, Enum):
+    unkown = '不明'
+    male = '男性'
+    female = '女性'

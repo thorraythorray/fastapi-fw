@@ -4,7 +4,7 @@ from tortoise import Tortoise
 
 from app.core.errors import register_exception_handlers
 from app.settings import settings
-from app.core.utils.authx import auth_manager
+from app.core.security import auth_manager
 
 TORTOISE_ORM = {
     "connections": {"default": settings.mysql.default_dsn},

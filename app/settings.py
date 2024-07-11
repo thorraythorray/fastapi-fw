@@ -6,6 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
+SECRET_KEY = "5f-Kh8) GK~j!$^% Q&*p@#q"
 
 ENV_FILES = (os.path.join(ROOT, '.env'), os.path.join(ROOT, '.env.usr'),)
 ENV_ENCODING = 'utf-8'

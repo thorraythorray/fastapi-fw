@@ -1,9 +1,10 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr, Field, PositiveInt
+from pydantic import BaseModel, EmailStr, Field, PositiveInt, model_validator
 
-from app.core.base.enum import Gender
+from app.core.base.enum import GenderEnum
 from app.core.schemas.pagination import PaginationSchema
+from app.core.log import logger
 
 
 class UserSchema(BaseModel):
@@ -12,7 +13,7 @@ class UserSchema(BaseModel):
     phone: Optional[str] = None
 
     age: PositiveInt = 1
-    sex: Gender = Gender.unkown
+    sex: GenderEnum = GenderEnum.unkown.value
 
     avatar: Optional[str] = None
 
