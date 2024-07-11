@@ -38,7 +38,8 @@ def get_fastapi_app():
         await Tortoise.init(
             config=TORTOISE_ORM,
         )
-        await Tortoise.generate_schemas()
+        # 每次重启都会创建不存在的表，不利于数据库迁移管理，暂时去掉
+        # await Tortoise.generate_schemas()
 
     app.add_event_handler("startup", init_tortoise)
 
