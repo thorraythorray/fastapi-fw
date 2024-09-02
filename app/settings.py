@@ -1,6 +1,7 @@
 import os
 from typing import List
 
+from memoization import cached, CachingAlgorithmFlag
 from pydantic import RedisDsn, MySQLDsn, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -67,4 +68,12 @@ class Settings(BaseSettings):
         return v.split(',')
 
 
-settings = Settings()
+@cached(max_size=1, algorithm=CachingAlgorithmFlag.LRU, thread_safe=True)
+def _cached_settings():
+    """
+    the sesstings is cached, and refreshed when configuration files changed
+    """
+    return Settings()
+
+
+settings = _cached_settings()
