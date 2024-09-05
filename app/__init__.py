@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from tortoise import Tortoise
 
-from app.core.errors import register_exception_handlers
+from app.errors import register_exception_handlers
 from app.settings import settings
-from app.core.security import auth_manager
+from app.utils.security import auth_manager
 
 TORTOISE_ORM = {
     "connections": {"default": settings.mysql.default_dsn},
@@ -13,9 +13,9 @@ TORTOISE_ORM = {
             "models": ["aerich.models"],
             "default_connection": "default",  # 指定 Aerich 模型使用的默认连接
         },
-        "core": {
+        "auth": {
             "models": [
-                "app.core.models.admin",
+                "app.auth.models",
             ],
             "default_connection": "default",
         },
@@ -46,7 +46,9 @@ def get_fastapi_app():
     auth_manager.handle_errors(app)
     register_exception_handlers(app)
 
-    from app.core.routers import admin
-    app.include_router(admin.router, prefix="/admin")
+    from app.auth.api import router as auth_router
+    from app.openai.api import router as openai_router
+    app.include_router(auth_router, prefix="/admin")
+    app.include_router(openai_router, prefix="/chat")
 
     return app

@@ -1,15 +1,13 @@
-from fastapi import Depends, APIRouter, Request
+from fastapi import Depends, APIRouter, Request, logger
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import PlainTextResponse
 
-from app.core.dependencies.auth import oauth2_authentication
-from app.core.schemas.admin import RegisterSchema, UserQuerySchema, UserInfoSchema, \
-    UsersPagitionSchema
-from app.core.services.admin import UserDaoMgr
-from app.core.security import auth_manager
-from app.core.log import logger
+from app.auth.dao import UserDaoMgr
+from app.auth.schemas import RegisterSchema, UserInfoSchema, UserQuerySchema, UsersPagitionSchema
+from app.auth.dependencies import oauth2_authentication
+from app.utils.security import auth_manager
 
-router = APIRouter()
+router = APIRouter(tags=["Auth"])
 
 
 @router.post("/login")

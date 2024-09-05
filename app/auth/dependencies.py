@@ -1,9 +1,8 @@
 from fastapi import Request
 from fastapi.security import OAuth2PasswordBearer
 
-from app.core.services.admin import UserDaoMgr
-from app.core.security import auth_manager
-from app.core.log import logger
+from app.auth.dao import UserDaoMgr
+from app.utils.security import auth_manager
 
 
 class CustomOAuth2PasswordBearer(OAuth2PasswordBearer):

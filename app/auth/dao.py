@@ -1,9 +1,10 @@
 from typing import Optional, Tuple, Union
 
-from app.core.errors import AuthError, AuthForbbiden, DuplicatedError
-from app.core.models.admin import User
-from app.core.schemas.admin import RegisterSchema, UserQuerySchema
-from app.core.utils.crypto import crypt_context
+from app.auth.models import User
+from app.auth.schemas import RegisterSchema, UserQuerySchema
+from app.errors import AuthError, AuthForbbiden, DuplicatedError
+from app.utils.crypto import hash_algorithm
+
 
 class UserDaoMgr:
 
@@ -11,7 +12,7 @@ class UserDaoMgr:
     async def create(cls, user_info: RegisterSchema) -> User:
         user_dict = user_info.model_dump()
         password = user_dict.pop('password')
-        user_dict["password"] = crypt_context.hash(password)
+        user_dict["password"] = hash_algorithm(password)
         user = await cls.find(user_info.name)
         if user:
             raise DuplicatedError('用户重复')

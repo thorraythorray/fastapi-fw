@@ -2,10 +2,10 @@ from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr, Field, PositiveInt, model_validator
 
-from app.core.base.enum import GENDER_TEXT_CONVERT, GenderEnum
-from app.core.models.admin import User
-from app.core.schemas.pagination import PaginationSchema
-from app.core.log import logger
+from app.auth.models import User
+from app.const import GENDER_TEXT_CONVERT, GenderEnum
+from app.db import PaginationSchema
+
 
 
 class UserBaseSchema(BaseModel):
