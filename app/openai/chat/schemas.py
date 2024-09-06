@@ -21,7 +21,7 @@ class OpenAIChatInputBody(BaseModel):
     stream_options: Optional[InputStreamOptions] = None
     # ether temperature or top_p
     temperature: Optional[confloat(gt=0, lt=2)] = 1  # type: ignore # 自由度
-    top_p: Optional[float] = 1  # type: ignore # 自由度
+    top_p: Optional[float] = 0.8  # type: ignore # 自由度
     tools: Optional[List[InputTools]] = None
     tool_choice: Union[str, InputTools, None] = None
     parallel_tool_calls: Optional[bool] = True
