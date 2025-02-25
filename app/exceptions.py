@@ -47,7 +47,7 @@ class DuplicatedError(HTTPException):
 
 # 自定义异常
 class AppServiceError(Exception):
-    def __init__(self, message: Union[str, None] = None):
+    def __init__(self, message: Union[str, None] = None) -> None:
         self.message = message or 'App Service Error'
 
 

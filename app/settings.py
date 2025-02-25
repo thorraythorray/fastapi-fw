@@ -12,7 +12,6 @@ SECRET_KEY = "5f-Kh8) GK~j!$^% Q&*p@#q"
 ENV_FILES = (os.path.join(ROOT, '.env'), os.path.join(ROOT, '.env.usr'),)
 ENV_ENCODING = 'utf-8'
 
-
 class GeneralSettings(BaseSettings):
     host: str = '127.0.0.1'
     port: int
@@ -77,3 +76,20 @@ def _cached_settings():
 
 
 settings = _cached_settings()
+
+
+TORTOISE_ORM = {
+    "connections": {"default": settings.mysql.default_dsn},
+    "apps": {
+        "aerich": {
+            "models": ["aerich.models"],
+            "default_connection": "default",  # 指定 Aerich 模型使用的默认连接
+        },
+        "auth": {
+            "models": [
+                "app.auth.models"
+            ],
+            "default_connection": "default",
+        },
+    },
+}

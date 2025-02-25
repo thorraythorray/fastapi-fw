@@ -1,7 +1,7 @@
 from tortoise import fields
 
 from app.const import GenderEnum
-from app.db import BaseTimestampModel
+from app.base import BaseTimestampModel
 from app.utils.crypto import hash_algorithm
 
 

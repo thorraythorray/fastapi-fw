@@ -6,7 +6,7 @@ from app.settings import SECRET_KEY
 
 
 authx_config = AuthXConfig(
-    JWT_ACCESS_TOKEN_EXPIRES=timedelta(hours=15),
+    JWT_ACCESS_TOKEN_EXPIRES=timedelta(hours=24),
     JWT_SECRET_KEY=SECRET_KEY,
 )
 

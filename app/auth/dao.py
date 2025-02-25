@@ -2,7 +2,7 @@ from typing import Optional, Tuple, Union
 
 from app.auth.models import User
 from app.auth.schemas import RegisterSchema, UserQuerySchema
-from app.errors import AuthError, AuthForbbiden, DuplicatedError
+from app.exceptions import AuthError, AuthForbbiden, DuplicatedError
 from app.utils.crypto import hash_algorithm
 
 

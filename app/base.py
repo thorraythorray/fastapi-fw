@@ -1,5 +1,5 @@
-from tortoise import fields, Model
 from pydantic import BaseModel, Field
+from tortoise import fields, Model
 
 
 class PaginationSchema(BaseModel):
