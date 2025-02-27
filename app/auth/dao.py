@@ -1,8 +1,14 @@
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, List
 
-from app.auth.models import User
-from app.auth.schemas import RegisterSchema, UserQuerySchema
-from app.exceptions import AuthError, AuthForbbiden, DuplicatedError
+from app.auth.models import User, Role, Permission
+from app.auth.schemas import RegisterSchema, UserQuerySchema, PermissionSchema, RoleSchema
+from app.exceptions import (
+    AuthError,
+    AuthForbbiden,
+    DuplicatedError,
+    ResourceInUseError,
+    NotFound
+)
 from app.utils.crypto import hash_algorithm
 
 
@@ -48,3 +54,72 @@ class UserDaoMgr:
         size = query_dict.pop('size')
         users = await User.filter(**query_dict).all().limit(size).offset((page - 1) * size)
         return dict(items=users, page=page, size=size)
+
+
+class PermissionDaoMgr:
+    @staticmethod
+    async def create(permission_info: PermissionSchema) -> Permission:
+        # 只检查code是否重复
+        if await Permission.filter(code=permission_info.code).exists():
+            raise DuplicatedError('权限标识符已存在')
+        return await Permission.create(**permission_info.model_dump())
+
+    @staticmethod
+    async def list() -> List[Permission]:
+        return await Permission.all()
+
+    @staticmethod
+    async def delete(permission_id: int) -> None:
+        try:
+            permission = await Permission.get(id=permission_id).prefetch_related('roles')
+        except Permission.DoesNotExist:
+            raise NotFound('权限不存在')
+
+        if permission.roles:
+            raise ResourceInUseError('无法删除权限：该权限仍被角色使用中')
+        await permission.delete()
+
+
+class RoleDaoMgr:
+    @staticmethod
+    async def create(role_info: RoleSchema) -> Role:
+        # 检查角色名是否重复
+        if await Role.filter(name=role_info.name).exists():
+            raise DuplicatedError('角色名称已存在')
+
+        role_dict = role_info.model_dump()
+        permission_ids = role_dict.pop('permissions', [])
+        role = await Role.create(**role_dict)
+        if permission_ids:
+            permissions = await Permission.filter(id__in=permission_ids)
+            await role.permissions.add(*permissions)
+        return role
+
+    @staticmethod
+    async def get_permissions(role_id: int) -> List[Permission]:
+        role = await Role.get(id=role_id).prefetch_related('permissions')
+        return role.permissions
+
+    @staticmethod
+    async def update_permissions(role_id: int, permission_ids: List[int]) -> None:
+        role = await Role.get(id=role_id)
+        permissions = await Permission.filter(id__in=permission_ids)
+        await role.permissions.clear()
+        if permissions:
+            await role.permissions.add(*permissions)
+
+    @staticmethod
+    async def delete(role_id: int) -> None:
+        try:
+            role = await Role.get(id=role_id).prefetch_related('users')
+        except Role.DoesNotExist:
+            raise NotFound('角色不存在')
+
+        if role.users:
+            raise ResourceInUseError('无法删除角色：该角色仍被用户使用中')
+        await role.permissions.clear()
+        await role.delete()
+
+    @staticmethod
+    async def list() -> List[Role]:
+        return await Role.all().prefetch_related('users', 'permissions')

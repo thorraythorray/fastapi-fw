@@ -41,6 +41,13 @@ class DuplicatedError(HTTPException):
         status_code = status.HTTP_409_CONFLICT
         super().__init__(status_code, detail)
 
+
+class ResourceInUseError(HTTPException):
+    def __init__(self, detail: str = '资源正在使用中') -> None:
+        status_code = status.HTTP_400_BAD_REQUEST
+        super().__init__(status_code, detail)
+
+
 # 更改系统内置的异常处理，例如统一处理500的TemplateResponse
 # app.add_exception_handler(HTTP_500_INTERNAL_SERVER_ERROR, server_error_exception)
 

@@ -5,9 +5,23 @@ from app.base import BaseTimestampModel
 from app.utils.crypto import hash_algorithm
 
 
+class Permission(BaseTimestampModel):
+    name = fields.CharField(max_length=64)
+    code = fields.CharField(max_length=64, unique=True)  # 权限标识符
+    description = fields.CharField(max_length=256, null=True)
+
+    class Meta:
+        table = "admin_permission"
+
+
 class Role(BaseTimestampModel):
     name = fields.CharField(max_length=32, unique=True)
     is_admin = fields.BooleanField(default=False)
+    permissions = fields.ManyToManyField(
+        'auth.Permission',
+        related_name='roles',
+        null=True
+    )
 
     class Meta:
         table = "admin_role"

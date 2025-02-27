@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr, Field, PositiveInt, model_validator
 
-from app.auth.models import User
+from app.auth.models import User, Role
 from app.const import GENDER_TEXT_CONVERT, GenderEnum
 from app.base import PaginationSchema
 
@@ -47,5 +47,26 @@ class UsersPagitionSchema(PaginationSchema):
     items: List[UserInfoSchema] = []
 
 
+class PermissionSchema(BaseModel):
+    name: str = Field(min_length=1, max_length=64)
+    code: str = Field(min_length=1, max_length=64)
+    description: Optional[str] = None
+
+
 class RoleSchema(BaseModel):
+    id: Optional[int] = None
     name: str = Field(max_length=32)
+    is_admin: bool = False
+    permissions: List[int] = []  # permission ids
+    user_count: Optional[int] = 0
+
+    @model_validator(mode='before')
+    def get_related_info(cls, values):
+        if isinstance(values, Role):
+            # 如果users已预加载，直接计算长度
+            if hasattr(values, 'users'):
+                values.user_count = len(values.users)
+            # 如果permissions已预加载，提取权限ID列表
+            if hasattr(values, 'permissions'):
+                values.permissions = [p.id for p in values.permissions]
+        return values
