@@ -1,77 +1,75 @@
-from fastapi import Depends, APIRouter, Request, logger
-from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.responses import PlainTextResponse
 from typing import List
+from fastapi import Depends, APIRouter, Request
+from fastapi.security import OAuth2PasswordRequestForm
 
-from app.auth.dao import UserDaoMgr, PermissionDaoMgr, RoleDaoMgr
-from app.auth.schemas import RegisterSchema, UserInfoSchema, UserQuerySchema, UsersPagitionSchema, PermissionSchema, RoleSchema
+from app.auth.dao import PermissionDaoMgr, RoleDaoMgr, UserDaoMgr
+from app.auth.schemas import (
+    PermCreateModel,
+    RoleCreateModel,
+    RoleQueryModel,
+    UserCreateModel,
+    UserEditModel,
+    UserInfoModel,
+    UserQueryModel,
+)
 from app.auth.dependencies import oauth2_authentication
-from app.utils.security import auth_manager
+from app.security import auth_manager
 
-router = APIRouter(tags=["Auth"])
+router = APIRouter(prefix='/api/admin', tags=["Auth"])
 
 
 @router.post("/login")
 async def login(data: OAuth2PasswordRequestForm = Depends()):
-    username = data.username
-    password = data.password
-    user = await UserDaoMgr.verify_user(username, password)
+    user = await UserDaoMgr.authenticate(data.username, data.password)
     token = auth_manager.create_access_token(uid=str(user.id))
     return {"access_token": token}
 
 
 @router.get("/me", dependencies=[Depends(oauth2_authentication)])
 async def read_me(request: Request):
-    logger.info(request.state.user)
-    return PlainTextResponse('ok')
+    user = request.state.user
+    if isinstance(user, list):
+        user = user[0]
+    return await UserInfoModel.from_tortoise_orm(user)
 
 
-@router.post("/user", response_model=UserInfoSchema, dependencies=[Depends(oauth2_authentication)])
-async def create_user(data: RegisterSchema):
+@router.post("/user", dependencies=[Depends(oauth2_authentication)])
+async def create_user(data: UserCreateModel):
     return await UserDaoMgr.create(data)
 
 
-@router.get("/users", response_model=UsersPagitionSchema, dependencies=[Depends(oauth2_authentication)])
-async def user_list(query_schema: UserQuerySchema = Depends()):
+@router.patch("/user/{user_id}", dependencies=[Depends(oauth2_authentication)])
+async def patch_user(user_id: int, data: UserEditModel):
+    return await UserDaoMgr.patch(user_id, data)
+
+
+@router.get("/users", dependencies=[Depends(oauth2_authentication)])
+async def user_list(query_schema: UserQueryModel = Depends()):
     return await UserDaoMgr.list(query_schema)
 
 
-@router.post("/permission",
-    response_model=PermissionSchema,
-    dependencies=[Depends(oauth2_authentication)]
-)
-async def create_permission(data: PermissionSchema):
-    """创建权限"""
-    return await PermissionDaoMgr.create(data)
+@router.delete("/user/{user_id}", dependencies=[Depends(oauth2_authentication)])
+async def user_list(user_id: int):
+    return await UserDaoMgr.delete(user_id)
 
 
-@router.get("/permissions",
-    response_model=List[PermissionSchema],
-    dependencies=[
-        Depends(oauth2_authentication),
-    ]
-)
-async def permission_list():
-    """获取权限列表"""
-    return await PermissionDaoMgr.list()
-
-
-@router.post("/role",
-    response_model=RoleSchema,
-    dependencies=[Depends(oauth2_authentication)],
-)
-async def create_role(data: RoleSchema):
+# Role
+@router.post("/role", dependencies=[Depends(oauth2_authentication)])
+async def create_role(data: RoleCreateModel):
     """创建角色"""
     return await RoleDaoMgr.create(data)
 
 
-@router.get("/role/{role_id}/permissions",
-    response_model=List[PermissionSchema],
-    dependencies=[Depends(oauth2_authentication)]
-)
+@router.get("/role/{role_id}/permissions", dependencies=[Depends(oauth2_authentication)])
 async def role_permissions(role_id: int):
     """获取角色的权限列表"""
     return await RoleDaoMgr.get_permissions(role_id)
+
+
+@router.get("/roles", dependencies=[Depends(oauth2_authentication)])
+async def role_list(query: RoleQueryModel = Depends()):
+    """获取角色列表"""
+    return await RoleDaoMgr.list(query)
 
 
 @router.put("/role/{role_id}/permissions", dependencies=[Depends(oauth2_authentication)])
@@ -83,18 +81,23 @@ async def update_role_permissions(role_id: int, permission_ids: List[int]):
 @router.delete("/role/{role_id}", dependencies=[Depends(oauth2_authentication)])
 async def delete_role(role_id: int):
     """删除角色"""
-    await RoleDaoMgr.delete(role_id)
-    return {"message": "角色删除成功"}
+    return await RoleDaoMgr.delete(role_id)
+
+
+# Permission
+@router.post("/permission", dependencies=[Depends(oauth2_authentication)])
+async def create_permission(data: PermCreateModel):
+    """创建权限"""
+    return await PermissionDaoMgr.create(data)
+
+
+@router.get("/permissions", dependencies=[Depends(oauth2_authentication)])
+async def permission_list():
+    """获取权限列表"""
+    return await PermissionDaoMgr.list()
 
 
 @router.delete("/permission/{permission_id}", dependencies=[Depends(oauth2_authentication)])
 async def delete_permission(permission_id: int):
     """删除权限"""
-    await PermissionDaoMgr.delete(permission_id)
-    return {"message": "权限删除成功"}
-
-
-@router.get("/roles", response_model=List[RoleSchema], dependencies=[Depends(oauth2_authentication)])
-async def role_list():
-    """获取角色列表"""
-    return await RoleDaoMgr.list()
+    return await PermissionDaoMgr.delete(permission_id)

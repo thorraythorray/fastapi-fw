@@ -1,9 +1,15 @@
-from typing import Union
+import json
+import traceback
 
 from fastapi import HTTPException, FastAPI
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+from tortoise.exceptions import BaseORMException
+from tortoise.exceptions import DoesNotExist, IntegrityError
+
+from app.model import FailedResponseModel
+
 
 
 class RequestError(HTTPException):
@@ -36,7 +42,7 @@ class AuthForbbiden(HTTPException):
         super().__init__(status_code, detail)
 
 
-class DuplicatedError(HTTPException):
+class ConflictError(HTTPException):
     def __init__(self, detail: str = 'Resource Conflict') -> None:
         status_code = status.HTTP_409_CONFLICT
         super().__init__(status_code, detail)
@@ -48,22 +54,33 @@ class ResourceInUseError(HTTPException):
         super().__init__(status_code, detail)
 
 
-# 更改系统内置的异常处理，例如统一处理500的TemplateResponse
-# app.add_exception_handler(HTTP_500_INTERNAL_SERVER_ERROR, server_error_exception)
+# catch exceptions
+def handler_api_errors(app: FastAPI):
 
+    @app.exception_handler(HTTPException)
+    async def http_exception_handler(request: Request, exc: HTTPException):  # pylint: disable=unused-argument
+        traceback.print_exc()
 
-# 自定义异常
-class AppServiceError(Exception):
-    def __init__(self, message: Union[str, None] = None) -> None:
-        self.message = message or 'App Service Error'
-
-
-# 处理自定义异常
-def register_exception_handlers(app: FastAPI):
-
-    @app.exception_handler(AppServiceError)
-    def _(request: Request, exc: AppServiceError):
         return JSONResponse(
-            status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content=exc.message
+            status_code=exc.status_code,
+            content=exc.detail
+        )
+
+    @app.exception_handler(BaseORMException)
+    async def tortoise_exception_handler(request: Request, exc: BaseORMException):  # pylint: disable=unused-argument
+        traceback.print_exc()
+
+        if exc == DoesNotExist:
+            status_code = status.HTTP_404_NOT_FOUND
+        elif exc == IntegrityError:
+            status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+        else:
+            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+
+        err_msg = exc.args[0] if exc.args else exc.args
+        failed_model = FailedResponseModel(msg=err_msg)
+
+        return JSONResponse(
+            status_code=status_code,
+            content=failed_model.model_dump()
         )

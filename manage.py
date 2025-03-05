@@ -1,15 +1,24 @@
 import asyncio
 import subprocess
+import time
+
 import click
 from aerich import Command
 
-from app.settings import TORTOISE_ORM
+from app.config import TORTOISE_ORM
 
 
 @click.group()
 def cli():
-    """Tortoise-Aerich 数据库迁移管理工具"""
+    """管理工具"""
     pass
+
+
+@cli.command()
+def lint():
+    subprocess.call("pycodestyle --config=.tox.ini .", shell=True)
+    time.sleep(0.2)
+    subprocess.call("pylint --rcfile=.pylintrc app/auth", shell=True)
 
 
 @cli.command()
@@ -23,18 +32,16 @@ def db(cmd, app, name):
                 for k, _ in TORTOISE_ORM["apps"].items():
                     _aerich_cmd = Command(tortoise_config=TORTOISE_ORM, app=k)
                     await _aerich_cmd.init_db(safe=True)
+
             asyncio.run(init_all())
             click.echo("初始化完成！")
         else:
-            match cmd:
-                case "migrate":
-                    db_cmd_list = ["aerich", "--app", f"{app}", f"{cmd}", "--name", f"{name}"]
-
-                case "upgrade":
-                    db_cmd_list = ["aerich", "--app", f"{app}", f"{cmd}"]
-
-                case _:
-                    db_cmd_list = ["aerich", f"{cmd}"]
+            if cmd == "migrate":
+                db_cmd_list = ["aerich", "--app", f"{app}", f"{cmd}", "--name", f"{name}"]
+            elif cmd == "upgrade":
+                db_cmd_list = ["aerich", "--app", f"{app}", f"{cmd}"]
+            else:
+                db_cmd_list = ["aerich", f"{cmd}"]
 
             click.echo(" ".join(db_cmd_list))
             msg = subprocess.check_output(db_cmd_list)

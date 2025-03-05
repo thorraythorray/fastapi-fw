@@ -1,72 +1,67 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr, Field, PositiveInt, model_validator
+from pydantic import BaseModel, EmailStr, Field, model_validator
+from tortoise.contrib.pydantic import pydantic_model_creator
 
-from app.auth.models import User, Role
-from app.const import GENDER_TEXT_CONVERT, GenderEnum
-from app.base import PaginationSchema
+from app.auth.models import Permission, Role, User
+from app.pagination import PageModel
+from app.const import GENDER_TEXT_CONVERT
 
+UserBaseModel = pydantic_model_creator(User, exclude=("password",))
 
-class UserBaseSchema(BaseModel):
-    name: str = Field(min_length=1, max_length=64)
-    email: EmailStr = Field(..., example="default@example.com")
-    phone: Optional[str] = None
-    sex: GenderEnum = GenderEnum.unkown.value
-    age: PositiveInt = 18
-    avatar: Optional[str] = None
+RoleBaseModel = pydantic_model_creator(Role)
+
+PermBaseModel = pydantic_model_creator(Permission, include=("id", "name", "code"))
 
 
-class UserInfoSchema(UserBaseSchema):
-    sex_text: Optional[str] = None
-    role_info: dict = {}
+class PermInfoModel(PermBaseModel):
+    pass
 
-    @model_validator(mode='after')
-    def get_sex_text(cls, values):
-        sex_text = GENDER_TEXT_CONVERT.get(values.sex)
-        values.sex_text = sex_text
-        return values
-
-    @model_validator(mode='before')
-    def get_role_info(cls, values):
-        if isinstance(values, User):
-            if values.role:
-                values.role_info = RoleSchema(name=values.role.name).model_dump()
-        return values
-
-
-class RegisterSchema(UserBaseSchema):
-    role: Optional[int] = None
-    password: str
-
-
-class UserQuerySchema(PaginationSchema):
+class RoleInfoModel(RoleBaseModel):
     pass
 
 
-class UsersPagitionSchema(PaginationSchema):
-    items: List[UserInfoSchema] = []
+class UserInfoModel(UserBaseModel):
+    role: Optional[RoleInfoModel]
+    sex_label: Optional[str]
+
+    @model_validator(mode='before')
+    def get_sex_label(cls, values):
+        sex_label = GENDER_TEXT_CONVERT.get(values.sex)
+        values.sex_label = sex_label
+        return values
 
 
-class PermissionSchema(BaseModel):
+class UserEditModel(BaseModel):
+    role_id: int | None = None
+    password: str | None = None
+
+
+class UserCreateModel(UserEditModel):
     name: str = Field(min_length=1, max_length=64)
-    code: str = Field(min_length=1, max_length=64)
-    description: Optional[str] = None
+    email: EmailStr = Field(..., example="default@example.com")
+    phone: Optional[str] = '19811999911'
 
 
-class RoleSchema(BaseModel):
-    id: Optional[int] = None
+class UserQueryModel(PageModel):
+    pass
+
+
+class RoleCreateModel(BaseModel):
     name: str = Field(max_length=32)
     is_admin: bool = False
     permissions: List[int] = []  # permission ids
-    user_count: Optional[int] = 0
 
-    @model_validator(mode='before')
-    def get_related_info(cls, values):
-        if isinstance(values, Role):
-            # 如果users已预加载，直接计算长度
-            if hasattr(values, 'users'):
-                values.user_count = len(values.users)
-            # 如果permissions已预加载，提取权限ID列表
-            if hasattr(values, 'permissions'):
-                values.permissions = [p.id for p in values.permissions]
-        return values
+
+class RoleQueryModel(PageModel):
+    pass
+
+
+class PermCreateModel(BaseModel):
+    name: str = Field(max_length=32)
+    code: str = None
+    parent_id: int = None
+
+
+class PermQueryModel(PageModel):
+    pass

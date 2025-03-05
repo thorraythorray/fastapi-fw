@@ -1,4 +1,6 @@
 __pycache__
 *.pyc
 .vscode
-note.md
+.idea
+test
+.env.local
