@@ -1,15 +1,11 @@
-import json
 import traceback
 
 from fastapi import HTTPException, FastAPI
 from starlette import status
-from starlette.requests import Request
 from starlette.responses import JSONResponse
-from tortoise.exceptions import BaseORMException
-from tortoise.exceptions import DoesNotExist, IntegrityError
+from tortoise.exceptions import BaseORMException, DoesNotExist, IntegrityError
 
-from app.core.config import FailedResponseModel
-
+from app.core.pagination import FailedResponseModel
 
 
 class RequestError(HTTPException):
@@ -54,32 +50,26 @@ class ResourceInUseError(HTTPException):
         super().__init__(status_code, detail)
 
 
-# catch exceptions
 def handler_api_errors(app: FastAPI):
-
     @app.exception_handler(HTTPException)
-    async def http_exception_handler(request: Request, exc: HTTPException):  # pylint: disable=unused-argument
+    async def http_exception_handler(_, exc: HTTPException):
         traceback.print_exc()
-
         return JSONResponse(
             status_code=exc.status_code,
             content=exc.detail
         )
 
     @app.exception_handler(BaseORMException)
-    async def tortoise_exception_handler(request: Request, exc: BaseORMException):  # pylint: disable=unused-argument
+    async def tortoise_exception_handler(_, exc: BaseORMException):
         traceback.print_exc()
-
         if exc == DoesNotExist:
             status_code = status.HTTP_404_NOT_FOUND
         elif exc == IntegrityError:
             status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
         else:
             status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-
         err_msg = exc.args[0] if exc.args else exc.args
         failed_model = FailedResponseModel(msg=err_msg)
-
         return JSONResponse(
             status_code=status_code,
             content=failed_model.model_dump()

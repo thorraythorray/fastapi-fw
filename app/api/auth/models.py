@@ -2,9 +2,8 @@ from enum import IntEnum
 
 from tortoise import fields
 
-from app.core.config import GenderEnum
-from app.core.config import BaseTimestampORM
-from app.core.config import hash_algorithm
+from app.core.base import BaseTimestampORM
+from app.core.security import hash_algorithm
 
 
 class GenderEnum(IntEnum):
@@ -22,7 +21,7 @@ GENDER_TEXT_CONVERT = {
 
 class Permission(BaseTimestampORM):
     name = fields.CharField(max_length=64)
-    code = fields.CharField(max_length=64, unique=True)  # 权限标识符
+    code = fields.CharField(max_length=64, unique=True)
     description = fields.CharField(max_length=256, null=True)
     parent = fields.ForeignKeyField(
         'auth.Permission',

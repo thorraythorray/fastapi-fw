@@ -1,15 +1,12 @@
-from pydantic import BaseModel, Field
-from tortoise.queryset import QuerySet
 from typing import Any
-from app.core.config import T
+from pydantic import BaseModel
+from tortoise.queryset import QuerySet
+
+from app.core.base import PaginationSchema
+from app.core.types import T
 
 
-class PageModel(BaseModel):
-    page: int = Field(default=1, ge=1)
-    per_page: int = Field(default=10, ge=1)
-
-
-class PaginatedResponse(PageModel):
+class PaginatedResponse(PaginationSchema):
     total: int = 0
     items: list = []
 
@@ -17,7 +14,7 @@ class PaginatedResponse(PageModel):
     async def from_queryset(
         cls,
         queryset: QuerySet,
-        pydantic_model: BaseModel,
+        pydantic_model,
         page: int = 1,
         per_page: int = 10
     ) -> T:

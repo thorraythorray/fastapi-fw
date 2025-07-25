@@ -3,19 +3,18 @@ from typing import List, Optional
 from pydantic import BaseModel, EmailStr, Field, model_validator
 from tortoise.contrib.pydantic import pydantic_model_creator
 
-from app.api.auth.models import Permission, Role, User
-from app.core.config import PageModel
-from app.core.config import GENDER_TEXT_CONVERT
+from app.api.auth.models import GENDER_TEXT_CONVERT, Permission, Role, User
+from app.core.base import PaginationSchema
+
 
 UserBaseModel = pydantic_model_creator(User, exclude=("password",))
-
 RoleBaseModel = pydantic_model_creator(Role)
-
 PermBaseModel = pydantic_model_creator(Permission, include=("id", "name", "code"))
 
 
 class PermInfoModel(PermBaseModel):
     pass
+
 
 class RoleInfoModel(RoleBaseModel):
     pass
@@ -33,8 +32,8 @@ class UserInfoModel(UserBaseModel):
 
 
 class UserEditModel(BaseModel):
-    role_id: int | None = None
-    password: str | None = None
+    role_id: Optional[int] = None
+    password: Optional[str] = None
 
 
 class UserCreateModel(UserEditModel):
@@ -43,17 +42,17 @@ class UserCreateModel(UserEditModel):
     phone: Optional[str] = '19811999911'
 
 
-class UserQueryModel(PageModel):
+class UserQueryModel(PaginationSchema):
     pass
 
 
 class RoleCreateModel(BaseModel):
     name: str = Field(max_length=32)
     is_admin: bool = False
-    permissions: List[int] = []  # permission ids
+    permissions: List[int] = []
 
 
-class RoleQueryModel(PageModel):
+class RoleQueryModel(PaginationSchema):
     pass
 
 
@@ -63,5 +62,5 @@ class PermCreateModel(BaseModel):
     parent_id: int = None
 
 
-class PermQueryModel(PageModel):
+class PermQueryModel(PaginationSchema):
     pass

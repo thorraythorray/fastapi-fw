@@ -1,10 +1,11 @@
 import os
-from typing import List
 from datetime import timedelta
+from typing import List
 
 from pydantic import RedisDsn, MySQLDsn, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from memoization import cached, CachingAlgorithmFlag
+from tortoise import fields, models
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -13,6 +14,7 @@ SECRET_KEY = "5f-Kh8) GK~j!$^% Q&*p@#q"
 ENV_FILES = (os.path.join(ROOT, 'config/.env'), os.path.join(ROOT, 'config/.env.usr'),)
 ENV_ENCODING = 'utf-8'
 
+
 class GeneralSettings(BaseSettings):
     host: str = '127.0.0.1'
     port: int
@@ -20,11 +22,10 @@ class GeneralSettings(BaseSettings):
 
 
 class RedisSettings(GeneralSettings):
-
     model_config = SettingsConfigDict(
         env_file=ENV_FILES,
         env_file_encoding=ENV_ENCODING,
-        env_prefix = "REDIS_",
+        env_prefix="REDIS_",
     )
 
     @property
@@ -35,11 +36,10 @@ class RedisSettings(GeneralSettings):
 class MysqlSettings(GeneralSettings):
     user: str
     db: str
-
     model_config = SettingsConfigDict(
         env_file=ENV_FILES,
         env_file_encoding=ENV_ENCODING,
-        env_prefix = "MYSQL_",
+        env_prefix="MYSQL_",
     )
 
     @property
@@ -55,7 +55,6 @@ class Settings(BaseSettings):
     allowed_cors_origins: str
     redis: RedisSettings = RedisSettings()
     mysql: MysqlSettings = MysqlSettings()
-
     model_config = SettingsConfigDict(
         env_file=ENV_FILES,
         env_file_encoding=ENV_ENCODING,
@@ -78,12 +77,21 @@ def _cached_settings():
 settings = _cached_settings()
 
 
+class BaseTimestampORM(models.Model):
+    id = fields.IntField(pk=True)
+    created_at = fields.DatetimeField(auto_now_add=True)
+    updated_at = fields.DatetimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+
 TORTOISE_ORM = {
     "connections": {"default": settings.mysql.default_dsn},
     "apps": {
         "aerich": {
             "models": ["aerich.models"],
-            "default_connection": "default",  # 指定 Aerich 模型使用的默认连接
+            "default_connection": "default",
         },
         "auth": {
             "models": [

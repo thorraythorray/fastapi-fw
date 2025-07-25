@@ -1,11 +1,10 @@
 import asyncio
 import subprocess
-import time
 
 import click
 from aerich import Command
 
-# from app.core.config import TORTOISE_ORM
+from app.core.config import TORTOISE_ORM
 
 
 @click.group()

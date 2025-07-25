@@ -1,7 +1,6 @@
 from typing import List
 from fastapi import Depends, APIRouter, Request
 from fastapi.security import OAuth2PasswordRequestForm
-
 from app.api.auth.crud import PermissionDaoMgr, RoleDaoMgr, UserDaoMgr
 from app.api.auth.schemas import (
     PermCreateModel,
@@ -12,8 +11,8 @@ from app.api.auth.schemas import (
     UserInfoModel,
     UserQueryModel,
 )
-from app.core.config import oauth2_authentication
-from app.core.config import auth_manager
+from app.api.auth.dependencies import oauth2_authentication
+from app.core.security import auth_manager
 
 router = APIRouter(prefix='/api/admin', tags=["Auth"])
 
@@ -49,7 +48,7 @@ async def user_list(query_schema: UserQueryModel = Depends()):
 
 
 @router.delete("/user/{user_id}", dependencies=[Depends(oauth2_authentication)])
-async def user_list(user_id: int):
+async def delete_user(user_id: int):
     return await UserDaoMgr.delete(user_id)
 
 

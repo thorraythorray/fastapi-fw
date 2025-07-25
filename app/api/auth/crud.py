@@ -1,8 +1,6 @@
-import traceback
 from typing import Optional, Union, List
 
 from tortoise.exceptions import DoesNotExist
-
 from app.api.auth.models import User, Role, Permission
 from app.api.auth.schemas import (
     RoleCreateModel,
@@ -13,31 +11,28 @@ from app.api.auth.schemas import (
     UserInfoModel,
     UserQueryModel,
 )
-from app.settings import AuthError, AuthForbbiden, ConflictError, ResourceInUseError, NotFound
-from app.settings import T
-from app.settings import PaginatedResponse
-from app.settings import hash_algorithm
+
+from app.core.error import AuthError, AuthForbbiden, ConflictError, ResourceInUseError, NotFound
+from app.core.pagination import PaginatedResponse
+from app.core.security import hash_algorithm
+from app.core.types import T
 
 
 class UserDaoMgr:
-
     @classmethod
     async def create(cls, user_model: UserCreateModel) -> User:
         user = await cls.find(user_model.name)
         if user:
             raise ConflictError('用户已存在')
-
         password = user_model.password
         user_model.password = hash_algorithm.hash(password)
         return await User.create(**user_model.model_dump())
-
 
     @classmethod
     async def patch(cls, user_id: int, user_model: UserEditModel):
         user = await cls.find(user_id)
         if not user:
             raise NotFound('用户不存在')
-
         if user_model.password:
             password = user_model.password
             user_model.password = hash_algorithm.hash(password)
@@ -57,7 +52,6 @@ class UserDaoMgr:
         user = await User.filter(name=username).first()
         if not user:
             raise AuthError('用户不存在')
-
         if not user.verify_password(password):
             raise AuthForbbiden('密码错误')
         return user
@@ -83,7 +77,6 @@ class RoleDaoMgr:
     async def create(role_info: RoleCreateModel) -> Role:
         if await Role.filter(name=role_info.name).exists():
             raise ConflictError('角色名称已存在')
-
         role_dict = role_info.model_dump()
         permission_ids = role_dict.pop('permissions', [])
         role = await Role.create(**role_dict)
@@ -116,7 +109,6 @@ class RoleDaoMgr:
             role = await Role.get(id=role_id).prefetch_related('users')
         except Role.DoesNotExist:
             raise NotFound('角色不存在')
-
         if role.users:
             raise ResourceInUseError('无法删除角色：该角色仍被用户使用中')
         await role.delete()
@@ -151,7 +143,6 @@ class PermissionDaoMgr:
             permission = await Permission.get(id=permission_id).prefetch_related('roles')
         except DoesNotExist:
             raise NotFound('权限不存在')
-
         if permission.roles:
             raise ResourceInUseError('无法删除权限：该权限仍被角色使用中')
         await permission.delete()
