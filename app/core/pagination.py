@@ -1,8 +1,6 @@
 from pydantic import BaseModel, Field
 from tortoise.queryset import QuerySet
 
-from app.model import T
-
 
 class PageModel(BaseModel):
     page: int = Field(default=1, ge=1)
@@ -25,3 +23,14 @@ class PaginatedResponse(PageModel):
         items = await pydantic_model.from_queryset(query_list)
         total = await queryset.count()
         return cls(total=total, items=items, page=page, per_page=per_page)
+
+
+class SuccessResponseModel(BaseModel):
+    code: int = 0
+    msg: str = 'ok'
+    data: Any = None
+
+
+class FailedResponseModel(BaseModel):
+    code: int = -1
+    msg: str = 'failed'

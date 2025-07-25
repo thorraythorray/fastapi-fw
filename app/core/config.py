@@ -1,9 +1,10 @@
 import os
 from typing import List
+from datetime import timedelta
 
-from memoization import cached, CachingAlgorithmFlag
 from pydantic import RedisDsn, MySQLDsn, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from memoization import cached, CachingAlgorithmFlag
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -87,9 +88,21 @@ TORTOISE_ORM = {
         },
         "auth": {
             "models": [
-                "app.auth.models"
+                "app.api.auth.models"
             ],
             "default_connection": "default",
         },
     },
 }
+
+# ==== 以下为 config.py 合并内容 ====
+LOGIN_URL = '/api/admin/login'
+
+AUTHX_CONFIG = {
+    "JWT_ACCESS_TOKEN_EXPIRES": timedelta(hours=24),
+    "JWT_SECRET_KEY": SECRET_KEY,
+}
+
+SKIP_RESPONSE_FORMAT_URLS = [
+    # 可在此添加需要跳过统一响应格式的 URL
+]

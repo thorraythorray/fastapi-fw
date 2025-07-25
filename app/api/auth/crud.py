@@ -3,8 +3,8 @@ from typing import Optional, Union, List
 
 from tortoise.exceptions import DoesNotExist
 
-from app.auth.models import User, Role, Permission
-from app.auth.schemas import (
+from app.api.auth.models import User, Role, Permission
+from app.api.auth.schemas import (
     RoleCreateModel,
     RoleInfoModel,
     RoleQueryModel,
@@ -13,16 +13,10 @@ from app.auth.schemas import (
     UserInfoModel,
     UserQueryModel,
 )
-from app.exceptions import (
-    AuthError,
-    AuthForbbiden,
-    ConflictError,
-    ResourceInUseError,
-    NotFound
-)
-from app.model import T
-from app.pagination import PaginatedResponse
-from app.security import hash_algorithm
+from app.settings import AuthError, AuthForbbiden, ConflictError, ResourceInUseError, NotFound
+from app.settings import T
+from app.settings import PaginatedResponse
+from app.settings import hash_algorithm
 
 
 class UserDaoMgr:

@@ -8,7 +8,7 @@ from starlette.responses import JSONResponse
 from tortoise.exceptions import BaseORMException
 from tortoise.exceptions import DoesNotExist, IntegrityError
 
-from app.model import FailedResponseModel
+from app.settings import FailedResponseModel
 
 
 

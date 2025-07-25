@@ -1,10 +1,10 @@
-from typing import Any, TypeVar
-
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from tortoise import fields, Model
-from tortoise.models import MODEL
 
-T = TypeVar('T', bound=BaseModel)
+
+class PaginationSchema(BaseModel):
+    page: int = Field(default=1, ge=1)
+    size: int = Field(default=10, ge=1)
 
 
 class BaseTimestampORM(Model):
@@ -19,14 +19,3 @@ class BaseTimestampORM(Model):
             if hasattr(self, k) and v:
                 setattr(self, k, v)
         await self.save()
-
-
-class SuccessResponseModel(BaseModel):
-    code: int = 0
-    msg: str = 'ok'
-    data: Any = None
-
-
-class FailedResponseModel(BaseModel):
-    code: int = -1
-    msg: str = 'failed'

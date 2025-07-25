@@ -5,8 +5,8 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
-from app import config
-from app.model import FailedResponseModel, SuccessResponseModel
+from app.settings import config
+from app.settings import FailedResponseModel, SuccessResponseModel
 
 
 class ResponseMiddleware(BaseHTTPMiddleware):

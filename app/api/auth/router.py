@@ -2,8 +2,8 @@ from typing import List
 from fastapi import Depends, APIRouter, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.auth.dao import PermissionDaoMgr, RoleDaoMgr, UserDaoMgr
-from app.auth.schemas import (
+from app.api.auth.crud import PermissionDaoMgr, RoleDaoMgr, UserDaoMgr
+from app.api.auth.schemas import (
     PermCreateModel,
     RoleCreateModel,
     RoleQueryModel,
@@ -12,8 +12,8 @@ from app.auth.schemas import (
     UserInfoModel,
     UserQueryModel,
 )
-from app.auth.dependencies import oauth2_authentication
-from app.security import auth_manager
+from app.settings import oauth2_authentication
+from app.settings import auth_manager
 
 router = APIRouter(prefix='/api/admin', tags=["Auth"])
 
