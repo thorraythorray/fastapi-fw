@@ -50,3 +50,5 @@ gmssl-python==2.2.2
 pycryptodome==3.21.0
 crypto==1.4.1
 Celery==5.4.0
+pycodestyle
+pylint

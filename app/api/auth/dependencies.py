@@ -3,8 +3,8 @@ from fastapi.security import OAuth2PasswordBearer
 
 from app.api.auth.crud import UserDaoMgr
 from config.exceptions import AuthError
-from app.settings import auth_manager
-from app.settings import LOGIN_URL
+from app.core.config import auth_manager
+from app.core.config import LOGIN_URL
 
 
 class CustomOAuth2PasswordBearer(OAuth2PasswordBearer):

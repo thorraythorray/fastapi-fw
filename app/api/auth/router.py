@@ -12,8 +12,8 @@ from app.api.auth.schemas import (
     UserInfoModel,
     UserQueryModel,
 )
-from app.settings import oauth2_authentication
-from app.settings import auth_manager
+from app.core.config import oauth2_authentication
+from app.core.config import auth_manager
 
 router = APIRouter(prefix='/api/admin', tags=["Auth"])
 

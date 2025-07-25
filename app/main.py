@@ -5,10 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from tortoise import Tortoise
 from tortoise.contrib.fastapi import RegisterTortoise
 
-from app.settings import ResponseMiddleware
-from app.settings import TORTOISE_ORM
-from app.settings import auth_manager
-from app.settings import handler_api_errors
+from app.core.config import ResponseMiddleware
+from app.core.config import TORTOISE_ORM
+from app.core.config import auth_manager
+from app.core.config import handler_api_errors
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

@@ -4,8 +4,8 @@ from pydantic import BaseModel, EmailStr, Field, model_validator
 from tortoise.contrib.pydantic import pydantic_model_creator
 
 from app.api.auth.models import Permission, Role, User
-from app.settings import PageModel
-from app.settings import GENDER_TEXT_CONVERT
+from app.core.config import PageModel
+from app.core.config import GENDER_TEXT_CONVERT
 
 UserBaseModel = pydantic_model_creator(User, exclude=("password",))
 

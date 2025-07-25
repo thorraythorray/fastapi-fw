@@ -6,11 +6,11 @@ from pydantic import RedisDsn, MySQLDsn, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from memoization import cached, CachingAlgorithmFlag
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = "5f-Kh8) GK~j!$^% Q&*p@#q"
 
-ENV_FILES = (os.path.join(ROOT, '.env'), os.path.join(ROOT, '.env.usr'),)
+ENV_FILES = (os.path.join(ROOT, 'config/.env'), os.path.join(ROOT, 'config/.env.usr'),)
 ENV_ENCODING = 'utf-8'
 
 class GeneralSettings(BaseSettings):
@@ -53,7 +53,6 @@ class Settings(BaseSettings):
     debug: bool = True
     server_host: str
     allowed_cors_origins: str
-
     redis: RedisSettings = RedisSettings()
     mysql: MysqlSettings = MysqlSettings()
 
@@ -95,7 +94,6 @@ TORTOISE_ORM = {
     },
 }
 
-# ==== 以下为 config.py 合并内容 ====
 LOGIN_URL = '/api/admin/login'
 
 AUTHX_CONFIG = {

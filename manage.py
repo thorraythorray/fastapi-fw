@@ -5,7 +5,7 @@ import time
 import click
 from aerich import Command
 
-from app.core.config import TORTOISE_ORM
+# from app.core.config import TORTOISE_ORM
 
 
 @click.group()
@@ -15,11 +15,10 @@ def cli():
 
 
 @cli.command()
-@click.option('--fix', is_flag=True, help='自动修复代码风格')
-def lint(fix):
+def lint():
     """代码风格检查（可选自动修复）"""
-    if fix:
-        subprocess.call("autopep8 --in-place --recursive app/", shell=True)
+    # if fix:
+    #     subprocess.call("autopep8 --in-place --recursive app/", shell=True)
     subprocess.call("pycodestyle --config=.tox.ini app/", shell=True)
     subprocess.call("pylint --rcfile=.pylintrc app/", shell=True)
 

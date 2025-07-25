@@ -4,3 +4,4 @@ __pycache__
 .idea
 test
 .env.local
+lint_report.txt

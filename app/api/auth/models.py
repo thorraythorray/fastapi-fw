@@ -2,9 +2,9 @@ from enum import IntEnum
 
 from tortoise import fields
 
-from app.settings import GenderEnum
-from app.settings import BaseTimestampORM
-from app.settings import hash_algorithm
+from app.core.config import GenderEnum
+from app.core.config import BaseTimestampORM
+from app.core.config import hash_algorithm
 
 
 class GenderEnum(IntEnum):
